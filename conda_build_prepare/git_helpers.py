@@ -148,7 +148,11 @@ def _call_custom_git_cmd(git_repo, cmd_string, check=True, quiet=False):
 def get_latest_describe_tag(git_repo):
     # Find the `git describe` tag having any version-like part
     try:
-        return _call_custom_git_cmd(git_repo, 'describe --tags --abbrev=0', quiet=True)
+        describe_tag = _call_custom_git_cmd(git_repo, 'describe --tags --abbrev=0', quiet=True)
+        tag_commit = _call_custom_git_cmd(git_repo, f'git rev-list --tags -1')
+        alt_tag = _call_custom_git_cmd(git_repo, f'tag --points-at {tag_commit}')
+        # Prefer actual tag over `git describe' if inconsistent.
+        return describe_tag if describe_tag.startswith(alt_tag) else alt_tag
     except subprocess.CalledProcessError:
         return None
 
