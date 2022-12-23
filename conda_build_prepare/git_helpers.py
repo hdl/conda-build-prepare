@@ -145,14 +145,11 @@ def _call_custom_git_cmd(git_repo, cmd_string, check=True, quiet=False):
     return stdout.strip()
 
 
-def get_latest_describe_tag(git_repo):
-    # Find the `git describe` tag having any version-like part
+def get_latest_tag(git_repo):
     try:
-        describe_tag = _call_custom_git_cmd(git_repo, 'describe --tags --abbrev=0', quiet=True)
-        tag_commit = _call_custom_git_cmd(git_repo, f'git rev-list --tags -1')
-        alt_tag = _call_custom_git_cmd(git_repo, f'tag --points-at {tag_commit}')
-        # Prefer actual tag over `git describe' if inconsistent.
-        return describe_tag if describe_tag.startswith(alt_tag) else alt_tag
+        tag_commit = _call_custom_git_cmd(git_repo, f'rev-list --tags -1')
+        tag_refname = _call_custom_git_cmd(git_repo, f'tag --points-at {tag_commit}')
+        return tag_refname
     except subprocess.CalledProcessError:
         return None
 
@@ -236,7 +233,7 @@ def git_rewrite_tags(git_repo):
     print(f'\nRewriting tags in "{os.path.abspath(git_repo)}"...\n')
 
     while True:
-        tag = get_latest_describe_tag(git_repo)
+        tag = get_latest_tag(git_repo)
         if tag is None:
             # Add '0.0' tag on initial commit and skip rewriting.
             git_add_initial_tag(git_repo)
