@@ -1,4 +1,3 @@
-import pathlib
 import time
 
 import conda_build_prepare.git_helpers as gh
