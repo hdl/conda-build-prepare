@@ -19,6 +19,12 @@ def git_commit_and_tag(filepath, msg, tag=None):
 def test_get_first_reachable_tag(tmp_path):
     repo = tmp_path
     gh._call_custom_git_cmd(repo, 'init -b main')
+    gh._call_custom_git_cmd(
+        repo, 'config --local user.email "you@example.com"'
+    )
+    gh._call_custom_git_cmd(
+        repo, 'config --local user.name "Your Name"'
+    )
     git_commit_and_tag(repo / 'foo', 'first', tag=None)
 
     initial_rev = gh._call_custom_git_cmd(repo, 'rev-parse HEAD')
