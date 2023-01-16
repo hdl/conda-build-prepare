@@ -145,10 +145,11 @@ def _call_custom_git_cmd(git_repo, cmd_string, check=True, quiet=False):
     return stdout.strip()
 
 
-def get_latest_describe_tag(git_repo):
-    # Find the `git describe` tag having any version-like part
+def get_first_reachable_tag(git_repo):
     try:
-        return _call_custom_git_cmd(git_repo, 'describe --tags --abbrev=0', quiet=True)
+        # list reachable tag sorted by commit date
+        tags = _call_custom_git_cmd(git_repo, 'tag --merged').splitlines()
+        return tags[-1]
     except subprocess.CalledProcessError:
         return None
 
@@ -232,7 +233,7 @@ def git_rewrite_tags(git_repo):
     print(f'\nRewriting tags in "{os.path.abspath(git_repo)}"...\n')
 
     while True:
-        tag = get_latest_describe_tag(git_repo)
+        tag = get_first_reachable_tag(git_repo)
         if tag is None:
             # Add '0.0' tag on initial commit and skip rewriting.
             git_add_initial_tag(git_repo)
